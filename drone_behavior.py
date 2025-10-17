@@ -1,11 +1,4 @@
-from tile_behavior import (
-    prepare_plot,
-    plant_crop,
-    harvest_crop,
-    plot_info,
-    solve_maze,
-    sort_cactus,
-)
+from tile_behavior import prepare_plot, plant_crop, harvest_crop, plot_info, spawn_maze
 from farm_vars import plot_parsed, plot_pos_by_id
 
 # ALL PASSED ARGS IN DRONESPACE
@@ -87,10 +80,13 @@ def prepare_loop(path, crop):
 
 def loop_farm(path, crop, plot_id):
     top, left, height, width = plot_pos_by_id[plot_id]
-    if crop == Entities.Bush:
-        solve_maze(height)
-        return
     bottom = get_world_size() - top - height
+    if crop == Entities.Bush:
+        adj = height // 2
+        move_drone_to(bottom + adj, left + adj)
+        spawn_maze(height)
+        solve_maze()
+        return
     move_drone_to(bottom, left)
     run_info = plot_info(True, drone_to_plot())
     for dir in path:
@@ -101,3 +97,35 @@ def loop_farm(path, crop, plot_id):
         harvest()
     if crop == Entities.Cactus:
         sort_cactus(height, width)
+
+
+def solve_maze():
+    directions = [North, East, South, West]
+    i = 0
+
+    def forward(i):
+        return directions[i]
+
+    def right(i):
+        return (i + 1) % 4
+
+    def left(i):
+        return (i + 3) % 4
+
+    def back(i):
+        return (i + 2) % 4
+
+    while get_entity_type() != Entities.Treasure and measure() != None:
+        move(forward(i))
+        if can_move(forward(right(i))):
+            i = right(i)
+        elif not can_move(forward(i)):
+            if can_move(forward(left(i))):
+                i = left(i)
+            else:
+                i = back(i)
+    harvest()
+
+
+def sort_cactus(height, width):
+    pass

@@ -36,42 +36,10 @@ def plant_crop(crop_type, r, c):
     return
 
 
-def solve_maze(size):
-    for i in range(size // 2):
-        move(North)
-        move(East)
+def spawn_maze(size):
     plant(Entities.Bush)
     substance = size * 2 ** (num_unlocked(Unlocks.Mazes) - 1)
     use_item(Items.Weird_Substance, substance)
-    directions = [North, East, South, West]
-    i = 0
-
-    def forward(i):
-        return directions[i]
-
-    def right(i):
-        return (i + 1) % 4
-
-    def left(i):
-        return (i + 3) % 4
-
-    def back(i):
-        return (i + 2) % 4
-
-    while get_entity_type() != Entities.Treasure:
-        move(forward(i))
-        if can_move(forward(right(i))):
-            i = right(i)
-        elif not can_move(forward(i)):
-            if can_move(forward(left(i))):
-                i = left(i)
-            else:
-                i = back(i)
-    harvest()
-
-
-def sort_cactus(height, width):
-    pass
 
 
 def harvest_crop(crop_type, r, c, run_info):
