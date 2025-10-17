@@ -60,7 +60,6 @@ def harvest_crop(crop_type, r, c, run_info):
         return retval
     elif crop_type == Entities.Pumpkin:
         if get_entity_type() == Entities.Dead_Pumpkin:
-            harvest()
             retval["valid"] = False
         plant_crop(crop_type, r, c)
         return retval

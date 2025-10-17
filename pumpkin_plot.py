@@ -1,17 +1,13 @@
-from plot_parser import hstack, vstack, parse_recursive
+from plot_parser import hstack, vstack
 
-pumpkins = (Entities.Pumpkin, 6, 6)
-sunflowers = (Entities.Sunflower, 2, 6)
-cactus2 = (Entities.Cactus, 2, 6)
-block1 = vstack(
-    [pumpkins, sunflowers, pumpkins, sunflowers, pumpkins, cactus2, pumpkins, cactus2]
-)
-maze = (Entities.Bush, 32, 2)
-maze3 = (Entities.Bush, 32, 3)
-maze2 = (Entities.Bush, 16, 4)
-trees = (Entities.Tree, 8, 4)
-cactus = (Entities.Cactus, 8, 4)
-block3 = vstack([maze2, trees, cactus])
-block4 = hstack([block1, maze, block1, maze, block1, maze3, block3, maze3])
+pumpkin = (Entities.Pumpkin, 6, 6)
+cactus = (Entities.Cactus, 2, 6)
+block1 = vstack([pumpkin, cactus, pumpkin, cactus, pumpkin, cactus, pumpkin, cactus])
+sunflower = (Entities.Sunflower, 32, 2)
+block2 = hstack([block1, sunflower, block1, sunflower, block1, sunflower])
+cactus2 = (Entities.Cactus, 8, 8)
+maze = (Entities.Bush, 8, 8)
+block3 = vstack([cactus2, maze, cactus2, maze])
+block4 = hstack([block2, block3])
 
 farm_block = block4

@@ -16,4 +16,7 @@ for plot_id in plot_pos_by_id:
             loop_farm(path, crop, plot_id)
 
     if not spawn_drone(task):
+        quick_print("all drones used :)")
         task()
+
+quick_print(num_drones(), "drones used")

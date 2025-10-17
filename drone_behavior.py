@@ -13,25 +13,33 @@ def move_drone():
     return False
 
 
+def flip_dir(dir):
+    if dir == East:
+        return West
+    elif dir == West:
+        return East
+    elif dir == North:
+        return South
+    elif dir == South:
+        return North
+
+
 def serpentine_path(height, width):
     path = []
     height_adj = height - 1
     width_adj = width - 1
 
-    def flip_dir(dir):
-        if dir == East:
-            return West
-        else:
-            return East
-
     dir = East
-
-    if width == 2:
+    if width == 1:
+        for i in range(height_adj):
+            path.append(North)
+    elif width == 2:
         for i in range(height_adj):
             path.append(North)
         path.append(dir)
         for i in range(height_adj):
             path.append(South)
+        path.append(West)
     else:
         for i in range(height_adj):
             path.append(North)
@@ -87,6 +95,10 @@ def loop_farm(path, crop, plot_id):
         spawn_maze(height)
         solve_maze()
         return
+    if crop == Entities.Cactus:
+        move_drone_to(bottom, left)
+        sort_cactus(bottom, left, height, width)
+        harvest()
     move_drone_to(bottom, left)
     run_info = plot_info(True, drone_to_plot())
     for dir in path:
@@ -95,8 +107,6 @@ def loop_farm(path, crop, plot_id):
         move(dir)
     if crop == Entities.Pumpkin and run_info["valid"]:
         harvest()
-    if crop == Entities.Cactus:
-        sort_cactus(height, width)
 
 
 def solve_maze():
@@ -127,5 +137,31 @@ def solve_maze():
     harvest()
 
 
-def sort_cactus(height, width):
-    pass
+def sort_cactus(bottom, left, height, width):
+    def sort(dir, tiles):
+        while tiles > 0:
+            changed = False
+            for i in range(tiles):
+                if measure(dir) < measure():
+                    changed = True
+                    swap(dir)
+                move(dir)
+            dir = flip_dir(dir)
+            for i in range(tiles):
+                if measure(dir) > measure():
+                    changed = True
+                    swap(dir)
+                move(dir)
+            dir = flip_dir(dir)
+            move(dir)
+            tiles -= 2
+            if not changed:
+                return
+
+    for i in range(height):
+        move_drone_to(bottom + i, left)
+        sort(East, width - 1)
+
+    for j in range(width):
+        move_drone_to(bottom, left + j)
+        sort(North, height - 1)
