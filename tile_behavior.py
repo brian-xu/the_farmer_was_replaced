@@ -1,5 +1,3 @@
-from farm_vars import plot_parsed, plot_pos_by_id
-
 # ALL ARGS IN PLOTSPACE
 
 
@@ -12,15 +10,19 @@ def water_tile():
         use_item(Items.Water)
 
 
-def prepare_plot(crop_type, r, c, plot_id):
+def prepare_plot(crop_type, r, c):
     if crop_type == Entities.Grass:
+        pass
+    elif crop_type == Entities.Bush:
         pass
     else:
         till()
 
 
-def plant_crop(crop_type, r, c, plot_id):
+def plant_crop(crop_type, r, c):
     if crop_type == Entities.Grass:
+        pass
+    elif crop_type == Entities.Bush:
         pass
     elif crop_type == Entities.Tree:
         water_tile()
@@ -28,55 +30,76 @@ def plant_crop(crop_type, r, c, plot_id):
             plant(Entities.Tree)
         else:
             plant(Entities.Bush)
-    elif crop_type == Entities.Cactus:
-        water_tile()
-        plant(Entities.Cactus)
-    elif crop_type == Entities.Bush:
-        if (r + c) % 2 == 0:
-            plant(Entities.Bush)
-            use_item(Items.Weird_Substance)
-            harvest()
-        else:
-            plant(Entities.Carrot)
     else:
         water_tile()
         plant(crop_type)
     return
 
 
-def harvest_crop(crop_type, r, c, plot_id, run_info):
+def solve_maze(size):
+    for i in range(size // 2):
+        move(North)
+        move(East)
+    plant(Entities.Bush)
+    substance = size * 2 ** (num_unlocked(Unlocks.Mazes) - 1)
+    use_item(Items.Weird_Substance, substance)
+    directions = [North, East, South, West]
+    i = 0
+
+    def forward(i):
+        return directions[i]
+
+    def right(i):
+        return (i + 1) % 4
+
+    def left(i):
+        return (i + 3) % 4
+
+    def back(i):
+        return (i + 2) % 4
+
+    while get_entity_type() != Entities.Treasure:
+        move(forward(i))
+        if can_move(forward(right(i))):
+            i = right(i)
+        elif not can_move(forward(i)):
+            if can_move(forward(left(i))):
+                i = left(i)
+            else:
+                i = back(i)
+    harvest()
+
+
+def sort_cactus(height, width):
+    pass
+
+
+def harvest_crop(crop_type, r, c, run_info):
     retval = plot_info(run_info["valid"], run_info["coord"])
     if crop_type == Entities.Grass:
         harvest()
         return retval
     elif crop_type == Entities.Tree:
         harvest()
-        plant_crop(crop_type, r, c, plot_id)
+        plant_crop(crop_type, r, c)
         return retval
     elif crop_type == Entities.Bush:
-        plant_crop(crop_type, r, c, plot_id)
-        return retval
+        quick_print("maze should never be passed to harvest_crop!")
+        x = 5 / 0
     elif crop_type == Entities.Carrot:
         harvest()
-        plant_crop(crop_type, r, c, plot_id)
+        plant_crop(crop_type, r, c)
         return retval
     elif crop_type == Entities.Pumpkin:
         if get_entity_type() == Entities.Dead_Pumpkin:
             harvest()
-            plant_crop(crop_type, r, c, plot_id)
             retval["valid"] = False
-        elif run_info["valid"]:
-            top, left, width, height = plot_pos_by_id[plot_id]
-            if r == top and c == left + width - 1:
-                harvest()
-        if not can_harvest():
-            plant_crop(crop_type, r, c, plot_id)
+        plant_crop(crop_type, r, c)
         return retval
     elif crop_type == Entities.Cactus:
-        harvest()
-        plant_crop(crop_type, r, c, plot_id)
+        plant_crop(crop_type, r, c)
         return retval
     elif crop_type == Entities.Sunflower:
         harvest()
-        plant_crop(crop_type, r, c, plot_id)
+        plant_crop(crop_type, r, c)
         return retval

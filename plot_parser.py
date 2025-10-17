@@ -55,7 +55,6 @@ def parse_recursive(block, root=False):
                 plots[plot] = [top, left + width, h, w]
             width += len(sub_parsed[0])
     else:
-        plot_count += 1
         crop = block[0]
         height = block[1]
         width = block[2]
@@ -65,4 +64,8 @@ def parse_recursive(block, root=False):
         for i in range(height):
             parsed.append(row)
         plots[plot_count] = [0, 0, height, width]
+        plot_count += 1
+        if plot_count > 31:
+            quick_print("subplots exceeded limit!")
+            x = 5 / 0
     return parsed, plots

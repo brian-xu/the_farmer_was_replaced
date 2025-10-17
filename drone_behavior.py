@@ -1,4 +1,11 @@
-from tile_behavior import prepare_plot, plant_crop, harvest_crop, plot_info
+from tile_behavior import (
+    prepare_plot,
+    plant_crop,
+    harvest_crop,
+    plot_info,
+    solve_maze,
+    sort_cactus,
+)
 from farm_vars import plot_parsed, plot_pos_by_id
 
 # ALL PASSED ARGS IN DRONESPACE
@@ -11,6 +18,40 @@ def move_drone():
         if get_pos_x() == 0:
             return True
     return False
+
+
+def serpentine_path(height, width):
+    path = []
+    height_adj = height - 1
+    width_adj = width - 1
+
+    def flip_dir(dir):
+        if dir == East:
+            return West
+        else:
+            return East
+
+    dir = East
+
+    if width == 2:
+        for i in range(height_adj):
+            path.append(North)
+        path.append(dir)
+        for i in range(height_adj):
+            path.append(South)
+    else:
+        for i in range(height_adj):
+            path.append(North)
+        for j in range(width_adj):
+            path.append(dir)
+        dir = flip_dir(dir)
+        for i in range(height_adj):
+            path.append(South)
+            for j in range(width_adj - 1):
+                path.append(dir)
+            dir = flip_dir(dir)
+        path.append(West)
+    return path
 
 
 def move_drone_to(target_r, target_c):
@@ -36,24 +77,27 @@ def drone_to_plot():
     return [get_world_size() - 1 - get_pos_y(), get_pos_x()]
 
 
-def reset_farm():
-    clear()
-    for _ in range(get_world_size() * get_world_size()):
+def prepare_loop(path, crop):
+    for dir in path:
         plot_r, plot_c = drone_to_plot()
-        crop, plot_id = plot_parsed[plot_r][plot_c]
-        prepare_plot(crop, plot_r, plot_c, plot_id)
-        plant_crop(crop, plot_r, plot_c, plot_id)
-        move_drone()
+        prepare_plot(crop, plot_r, plot_c)
+        plant_crop(crop, plot_r, plot_c)
+        move(dir)
 
 
-def loop_farm():
-    run_info = {}
-    for plot_id in plot_pos_by_id:
-        run_info[plot_id] = plot_info(True, drone_to_plot())
-    for _ in range(get_world_size() * get_world_size()):
+def loop_farm(path, crop, plot_id):
+    top, left, height, width = plot_pos_by_id[plot_id]
+    if crop == Entities.Bush:
+        solve_maze(height)
+        return
+    bottom = get_world_size() - top - height
+    move_drone_to(bottom, left)
+    run_info = plot_info(True, drone_to_plot())
+    for dir in path:
         plot_r, plot_c = drone_to_plot()
-        crop, plot_id = plot_parsed[plot_r][plot_c]
-        run_info[plot_id] = harvest_crop(
-            crop, plot_r, plot_c, plot_id, run_info[plot_id]
-        )
-        move_drone()
+        run_info = harvest_crop(crop, plot_r, plot_c, run_info)
+        move(dir)
+    if crop == Entities.Pumpkin and run_info["valid"]:
+        harvest()
+    if crop == Entities.Cactus:
+        sort_cactus(height, width)
